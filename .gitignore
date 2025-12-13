@@ -1,0 +1,6 @@
+volume
+tmp
+
+.terraform/
+*.tfstate
+*.tfstate.*
