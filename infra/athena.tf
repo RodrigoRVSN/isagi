@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "athena_results" {
-  bucket = "rvsn-athena-results"
+  bucket        = "rvsn-athena-results"
+  force_destroy = true
 }
 
 resource "aws_athena_database" "athena_db" {
