@@ -4,12 +4,14 @@ resource "aws_s3_bucket" "athena_results" {
 }
 
 resource "aws_athena_database" "athena_db" {
-  name   = "database_name"
-  bucket = aws_s3_bucket.athena_results.id
+  name          = "database_name"
+  bucket        = aws_s3_bucket.athena_results.id
+  force_destroy = true
 }
 
 resource "aws_athena_workgroup" "workgroup" {
-  name = "workgroup_name"
+  name          = "workgroup_name"
+  force_destroy = true
 
   configuration {
     result_configuration {
