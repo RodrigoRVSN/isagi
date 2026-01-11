@@ -21,5 +21,18 @@ resource "aws_glue_catalog_table" "aws_glue_catalog" {
       type    = "string"
       comment = "the user id"
     }
+
+    columns {
+      name    = "username"
+      type    = "string"
+      comment = "the user name"
+    }
+
+    columns {
+      name    = "timestamp"
+      type    = "string"
+      comment = "the time when the user was created"
+    }
+
   }
 }

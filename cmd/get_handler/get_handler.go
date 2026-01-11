@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/athena"
@@ -43,7 +44,6 @@ func Handle(w http.ResponseWriter, awsCfg aws.Config) {
 		status = execution.QueryExecution.Status.State
 	}
 
-	var users []models.User
 	results, err := awsClient.GetQueryResults(context.TODO(), &athena.GetQueryResultsInput{QueryExecutionId: output.QueryExecutionId})
 
 	if err != nil {
@@ -52,9 +52,41 @@ func Handle(w http.ResponseWriter, awsCfg aws.Config) {
 		return
 	}
 
-	for _, row := range results.ResultSet.Rows {
-		userId, _ := uuid.Parse(*row.Data[0].VarCharValue)
-		users = append(users, models.User{ID: userId})
+	var columnIndex map[string]int
+	columnIndex = make(map[string]int)
+	for i, col := range results.ResultSet.ResultSetMetadata.ColumnInfo {
+		columnIndex[*col.Name] = i
+	}
+
+	var users []models.User
+	for indexRow, row := range results.ResultSet.Rows {
+		if indexRow == 0 { // ignore headers
+			continue
+		}
+		var user models.User
+
+		if idx, ok := columnIndex["id"]; ok {
+			if row.Data[idx].VarCharValue != nil {
+				if id, err := uuid.Parse(*row.Data[idx].VarCharValue); err == nil {
+					user.ID = id
+				}
+			}
+		}
+		if idx, ok := columnIndex["username"]; ok {
+			if row.Data[idx].VarCharValue != nil {
+				user.Username = *row.Data[idx].VarCharValue
+			}
+		}
+		if idx, ok := columnIndex["timestamp"]; ok {
+			if row.Data[idx].VarCharValue != nil {
+				if time, err := time.Parse(time.RFC3339, *row.Data[idx].VarCharValue); err == nil {
+					user.Timestamp = time
+				}
+			}
+		}
+
+		users = append(users, user)
+
 	}
 	if err := json.NewEncoder(w).Encode(users); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
