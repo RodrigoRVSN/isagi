@@ -1,0 +1,24 @@
+name: Terraform
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Terraform setup
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        id: init
+        run: terraform -chdir=./infra init
+        continue-on-error: true
+
+      - name: Terraform plan
+        id: plan
+        run: terraform -chdir=./infra plan
