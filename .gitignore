@@ -6,3 +6,5 @@ tmp
 *.tfstate.*
 
 .env
+
+go_app

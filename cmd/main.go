@@ -35,6 +35,9 @@ func usersHandler(w http.ResponseWriter, request *http.Request) {
 func main() {
 	logger := logger.Init()
 	http.HandleFunc("/users", usersHandler)
+	http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.Write([]byte("ok"))
+	})
 	logger.Infof("Starting server on :%d", PORT)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil))
 }
